@@ -13,9 +13,10 @@ alias gsu='git status '
 
 gk()
 {
-    gitk --all "$@" &
-    disown
+    do_local nohup gitk "$@"
 }
+
+alias gka="gk --all"
 
 # git magic
 # adds the current branch to the bash prompt
@@ -37,3 +38,4 @@ __git_complete gom _git_checkout
 __git_complete gpom __git_main
 __git_complete gh __git_main
 
+alias gcloc="cloc \$(git ls-files)"
