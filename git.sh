@@ -1,6 +1,7 @@
 #!/bin/bash
 
-alias gs='git status -uno '
+alias gs='git status '
+alias gr='git reflog --date=iso '
 alias ga='git add '
 alias gau='git add -u '
 alias gb='git branch '
@@ -20,6 +21,7 @@ alias gka="gk --all"
 
 # git magic
 # adds the current branch to the bash prompt
+set +u
 source "$TWC_HOME"/.git-prompt.sh
 
 # allows tab completion of branches and commands and such
@@ -37,5 +39,6 @@ __git_complete go _git_checkout
 __git_complete gom _git_checkout
 __git_complete gpom __git_main
 __git_complete gh __git_main
+__git_complete gr __git_main
 
 alias gcloc="cloc \$(git ls-files)"

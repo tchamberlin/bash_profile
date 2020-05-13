@@ -2,9 +2,13 @@
 
 ### General-purpose aliases and functions ###
 
-export HISTFILE=$TWC_HOME/.bash.d/history
-export HISTSIZE=1000000
-export HISTFILESIZE=1000000
+export HISTSIZE=
+export HISTFILESIZE=
+export HISTFILE=$TWC_HOME/.bash_eternal_history
+HISTCONTROL=ignoredups:erasedups
+shopt -s histappend
+# PROMPT_COMMAND='history -a'
+# export PROMPT_COMMAND='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
 
 # Reload my environment
 alias twc="source $TWC_HOME/.bash_profile"
@@ -79,13 +83,13 @@ export -f subl_proj
 alias sp=subl_proj
 
 function subl() {
-    if [ *"${*}"* == "--project" ]; then
+    if [[ "--project" == *"${*}"* ]]; then
         if wmctrl -l | awk '{print substr($0, index($0, $4))}' | grep 'Sublime Text' | grep "($1)" >/dev/null; then
             _debug "Project with name '$repo' is already open in Sublime Text"
             return 1
         fi
     fi
-    do_local _subl
+    do_local _subl "$@"
 }
 
 function cdn() {
@@ -165,11 +169,6 @@ function rdesk() {
         xfreerdp "/size:${x_scaled}x${y_scaled}" /bpp:16 /d:"AD" /v:"$host" /u:"$USER" "$@"
     fi
 }
-
-# Add some stuff to the PATH/MANPATH
-PATH=/home/gbt1/sublime_merge:/home/gbt1/sublime_text_3:$SB/programs/bin:/users/tchamber/bin:/opt/local/bin:$PATH
-PATH=$TWC_HOME/bin:$SB/repos/bash_scripts:$PATH
-export MANPATH=$SB/programs/share/man:$MANPATH
 
 ### git ###
 
@@ -283,51 +282,6 @@ findlib()
 
 export GBORS=$SB/projects/gbors/sandbox/gbors
 
-cdgrs() {
-    ssh_target_host="galileo"
-    if [ "$(hostname)" != "$ssh_target_host" ]; then
-        ssh -qt "$ssh_target_host" "cd $GBORS; GBORS_INTERPRETER=$cpython"
-    else
-        cd $GBORS
-        # Need to specify GBORS_INTERPRETER here so that handle_gbors_env knows
-        # which environment to source
-        GBORS_INTERPRETER=$interpreter newgrp gbors
-    fi
-    cd "$GBORS"
-    sv
-}
-
-# cdgrs()
-# {
-#     set -e
-#     cd $"GBORS" || return 1
-#     # if type -t deactivate > /dev/null; then
-#     #     echo "Leaving virtual environment: '$VIRTUAL_ENV'"
-#     #     deactivate
-#     # fi
-#     local interpreter
-#     if [ "${1,,}" == "pypy" ]; then
-#         echo "Entering PyPy GBORS environment"
-#         interpreter="pypy"
-#     else
-#         echo "Entering CPython GBORS environment"
-#         interpreter="cpython"
-#     fi
-#     if [ -n "$2" ]; then
-#         ssh_target_host="$2"
-#     else
-#         ssh_target_host="galileo"
-#     fi
-#     if [ "$(hostname)" != "$ssh_target_host" ]; then
-#         ssh -qt "$ssh_target_host" "cd $GBORS; GBORS_INTERPRETER=$interpreter newgrp gbors"
-#     else
-#         cd $GBORS
-#         # Need to specify GBORS_INTERPRETER here so that handle_gbors_env knows
-#         # which environment to source
-#         GBORS_INTERPRETER=$interpreter newgrp gbors
-#     fi
-# }
-
 function _debug() {
     if [ -n "$_LOG_DEBUG" ]; then
         echo "DEBUG: $*" >&2
@@ -348,6 +302,8 @@ function cdr() {
     local repo
     repo="$1"
 
+    export CURRENT_REPO="$repo"
+
     if [ ! -d "$REPOS/$repo" ]; then
         echo "ERROR: $REPOS/$repo does not exist!" >&2
         return 1
@@ -357,27 +313,28 @@ function cdr() {
 
     ssh_target_host="galileo"
 
-    # Now, try a few different versions of project name. Sometimes we use -;
-    # sometimes we use _, so let's try some common permutations
-    # v1: No changes
-    sublime_project_path_v1="$SUBLIME_PROJECTS/$repo.sublime-project"
-    # v2: Use - instead of _
-    sublime_project_path_v2="$SUBLIME_PROJECTS/${repo//_/-}.sublime-project"
-    # v3: Use _ instead of -
-    sublime_project_path_v3="$SUBLIME_PROJECTS/${repo//-/_}.sublime-project"
-    for sublime_project_path in "$sublime_project_path_v1" "$sublime_project_path_v2" "$sublime_project_path_v3"; do
-        _debug "Attempting to find Sublime Text project at: $sublime_project_path"
-        if [ -f "$sublime_project_path" ]; then
-            _debug "Found $sublime_project_path; attempting to open in Sublime Text"
-            _subl --project "$sublime_project_path"
-            # Break out after we've made a single attempt to open the project
-            break
-        else
-            _debug "No project found at $sublime_project_path"
-        fi
-    done
+    # # Now, try a few different versions of project name. Sometimes we use -;
+    # # sometimes we use _, so let's try some common permutations
+    # # v1: No changes
+    # sublime_project_path_v1="$SUBLIME_PROJECTS/$repo.sublime-project"
+    # # v2: Use - instead of _
+    # sublime_project_path_v2="$SUBLIME_PROJECTS/${repo//_/-}.sublime-project"
+    # # v3: Use _ instead of -
+    # sublime_project_path_v3="$SUBLIME_PROJECTS/${repo//-/_}.sublime-project"
+    # for sublime_project_path in "$sublime_project_path_v1" "$sublime_project_path_v2" "$sublime_project_path_v3"; do
+    #     _debug "Attempting to find Sublime Text project at: $sublime_project_path"
+    #     if [ -f "$sublime_project_path" ]; then
+    #         _debug "Found $sublime_project_path; attempting to open in Sublime Text"
+    #         _subl --project "$sublime_project_path"
+    #         # Break out after we've made a single attempt to open the project
+    #         break
+    #     else
+    #         _debug "No project found at $sublime_project_path"
+    #     fi
+    # done
 
     if [ "$(hostname)" != "$ssh_target_host" ]; then
+        echo "Setting tab title to $USER@$HOSTNAME: $repo"
         _debug "Not currently on target host $ssh_target_host; ssh'ing now"
         # This is where the magic happens! We ssh to our target host, then open a new
         # bash shell with two variables set:
@@ -403,10 +360,22 @@ function handle_go_to_repo() {
             _debug "Rules found for repo $repo"
             source ./env/gbors.bash
             export DJANGO_SETTINGS_MODULE=gbors.settings.development
+            export PATH=/home/gbors/node/bin:$PATH
+        elif [[ "$repo" == "nrqz_admin" ]]; then
+            source /home/sandboxes/tchamber/venvs/nrqz-admin-py3.7/bin/activate
+            export DJANGO_SETTINGS_MODULE=nrqz_admin.settings.local
+        elif [[ "$repo" == "SDDdocs" ]]; then
+            sv
+            ./bin/builddocs --host "$HOSTNAME" --port 8189
         else
             echo "No explicit rules defined for $repo; attempting to find virtualenv" >&2
             sv
         fi
+        # export PROMPT_COMMAND='printf "\033]0;(%s) %s@%s:%s\007" "$repo" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
+        path_part="${PWD/#$HOME/~}"
+	path_part="${path_part/$SB/\$SB}"
+	echo -en "\033]0;${USER}@${HOSTNAME}:${path_part}\a"
+
     else
         _debug "handle_go_to_repo: GO_TO_REPO is not defined; NOP"
     fi
@@ -491,8 +460,6 @@ usegcc53()
 
 ### Haskell ###
 
-PATH=/users/tchamber/.local/bin:$PATH
-PATH=/home/sandboxes/tchamber/haskell/install/bin/:$PATH
 export STACK_ROOT=/home/sandboxes/tchamber/haskell/.stack
 
 
@@ -513,7 +480,7 @@ Color_Off="\[\e[0m\]"       # Text Reset
 # White="\[\e[0;37m\]"        # White
 
 # Bold
-# BBlack="\[\e[1;30m\]"       # Black
+BBlack="\[\e[1;30m\]"       # Black
 BRed="\[\e[1;31m\]"         # Red
 BGreen="\[\e[1;32m\]"       # Green
 BYellow="\[\e[1;33m\]"      # Yellow
@@ -585,7 +552,7 @@ else
 fi
 
 # Set punctuation to white
-PUNCCOLOR=$BWhite
+PUNCCOLOR=$BBlack
 
 # Decide what color the hostname text is based on which host I am currently on
 if [ "$(hostname)" == "$MY_WORKSTATION" ]; then
@@ -600,12 +567,12 @@ fi
 
 TIMECOLOR=$BPurple
 NUMBCOLOR=$BCyan
-PATHCOLOR=$BYellow
+PATHCOLOR=$BPurple
 TEXTCOLOR=$Color_Off
 
 # export PS1="$Color_Off\n$PUNCCOLOR<$USERCOLOR\u$PUNCCOLOR@$HOSTCOLOR\h$PUNCCOLOR> $PUNCCOLOR{$TIMECOLOR\d$PUNCCOLOR|$TIMECOLOR\t$PUNCCOLOR} ($NUMBCOLOR#\!$PUNCCOLOR) [$PATHCOLOR\w$PUNCCOLOR]\$(__git_ps1)\n\$ $TEXTCOLOR"
-export PS1="$Color_Off\n$PUNCCOLOR<$USERCOLOR\u$PUNCCOLOR@$HOSTCOLOR\h$PUNCCOLOR> [$PATHCOLOR\w$PUNCCOLOR]\$(__git_ps1)\n\$ $TEXTCOLOR"
-
+export PS1="$Color_Off\n$PUNCCOLOR<$USERCOLOR\u$PUNCCOLOR@$HOSTCOLOR\h$PUNCCOLOR> [$PATHCOLOR\w$PUNCCOLOR]\n\$$TEXTCOLOR "
+# export PROMPT_COMMAND="set +u; ${PROMPT_COMMAND}; __git_ps1 '$Color_Off\n$PUNCCOLOR<$USERCOLOR\u$PUNCCOLOR@$HOSTCOLOR\h$PUNCCOLOR> [$PATHCOLOR\w$PUNCCOLOR]' '\n\$ $TEXTCOLOR'"
 
 handle_go_to_repo
 
@@ -620,7 +587,7 @@ if [ "$(get_rhel_version)" == "7" ]; then
     shopt -s direxpand
 
     source /opt/rh/rh-git29/enable
-    source /opt/rh/devtoolset-7/enable
+    # source /opt/rh/devtoolset-7/enable
     # alias p3="source \$SB/venvs/twc_python3.6/bin/activate"
     export -f gen_subl_proj
     alias gsp=gen_subl_proj
@@ -672,3 +639,70 @@ export HOSTALIASES=~/.config/.hosts
 
 alias pr="poetry run"
 alias p="poetry"
+
+initconda() {
+    if [[ -z "$CONDA_PREFIX" ]]; then
+        __conda_setup="$('/opt/local/stow/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+        if [ $? -eq 0 ]; then
+            eval "$__conda_setup"
+        else
+            if [ -f "/opt/local/stow/anaconda3/etc/profile.d/conda.sh" ]; then
+                . "/opt/local/stow/anaconda3/etc/profile.d/conda.sh"
+            else
+                export PATH="/opt/local/stow/anaconda3/bin:$PATH"
+            fi
+        fi
+        unset __conda_setup
+    else
+        echo "Conda already initialized" >&2
+    fi
+}
+
+alias rl='readlink -f '
+function lc() {
+    local link
+    link="$(readlink -f "$1")"
+    echo "$link"
+    echo "$link" | _clip
+    echo "Copied to clipboard" >&2
+}
+
+function ce() {
+    sshcron "$*" -e
+}
+
+function cl() {
+    sshcron "$*"
+}
+
+
+# function goprod() {
+#     if [[ "$1" == "gbors" ]]; then
+        
+#     fi
+# }
+# complete -W "gbors foo" 'goprod'
+# complete -W "gbors foo" 'gop'
+# alias gop=goprod
+
+alias sdb='rclone copy dropbox:twc.kdbx /home/sandboxes/tchamber/downloads'
+
+complete -W "$(while read -r path; do echo ${path%%\.md}; done <<< "$(find ~/.local/share/tldr/pages/{linux,common} -printf '%f\n')")" tldr
+
+export TLDR_TITLE_STYLE="Newline Space Bold Black"
+export TLDR_DESCRIPTION_STYLE="Space Black"
+export TLDR_EXAMPLE_STYLE="Newline Space Bold Green"
+export TLDR_CODE_STYLE="Space Bold Blue"
+export TLDR_VALUE_ISTYLE="Space Bold Cyan"
+# The Value style (above) is an Inline style: doesn't take Newline or Space
+# Inline styles for help text: default, URL, option, platform, command, header
+export TLDR_DEFAULT_ISTYLE="White"
+export TLDR_URL_ISTYLE="Black"
+export TLDR_HEADER_ISTYLE="Bold"
+export TLDR_OPTION_ISTYLE="Bold Black"
+export TLDR_PLATFORM_ISTYLE="Bold Blue"
+export TLDR_COMMAND_ISTYLE="Bold Cyan"
+export TLDR_FILE_ISTYLE="Bold Magenta"
+# Color/BG (Newline and Space also allowed) for error and info messages
+export TLDR_ERROR_COLOR="Newline Space Red"
+export TLDR_INFO_COLOR="Newline Space Green"

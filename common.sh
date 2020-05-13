@@ -274,3 +274,110 @@ countfiles() {
 cdreal() {
     cd "$(readlink -f .)"
 }
+
+function tabtitle() {
+    if [[ -n "$1" ]]; then
+        echo -ne "\033]30;$1\007"
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+set-konsole-tab-title-type ()
+{
+    local _title=$1
+    local _type=${2:-0}
+    [[ -z "${_title}" ]]               && return 1
+    [[ -z "${KONSOLE_DBUS_SERVICE}" ]] && return 1
+    [[ -z "${KONSOLE_DBUS_SESSION}" ]] && return 1
+    qdbus >/dev/null "${KONSOLE_DBUS_SERVICE}" "${KONSOLE_DBUS_SESSION}" setTabTitleFormat "${_type}" "${_title}"
+}
+set-konsole-tab-title ()
+{
+    set-konsole-tab-title-type $1 && set-konsole-tab-title-type $1 1
+}
+
+function run_gitstats_for_all_repos() {
+    local output_root
+    local output
+    local full_repo_path
+    output_root="/home/www.gb.nrao.edu/homes/monctrl/gitstats"
+    for repo in /home/gbt2/git/integration-bare/*; do
+        (
+            # echo "repo $repo"
+            full_repo_path="$(readlink -f "$repo")"
+            # echo "frp $full_repo_path"
+            cd "$full_repo_path"
+            repo_name="$(basename "$repo")"
+
+            echo "Processing $repo..."
+            output="$output_root/$repo_name"
+            # echo "output $output"
+            date_of_latest_commit="$(git log -n 1 --pretty=format:%ad --date=iso)"
+            echo "Last commit was at: $date_of_latest_commit"
+            if [[ "$(date --date "$date_of_latest_commit" +%s)" -ge "$(date -d yesterday +%s)" ]]; then
+                if gitstats . "$output" >/dev/null; then
+                    echo "  Wrote report to $output"
+                else
+                    echo "  Failed..."
+                fi
+            else
+                echo "  No commits in the last day; skipping..."
+            fi
+        )
+    done
+}
+
+
+function run_gitstats_for_my_repos() {
+    local expected_author="Thomas Chamberlin"
+    local output
+    for repo in "$REPOS"/*; do
+        cd "$repo"
+        repo_name="$(basename "$repo")"
+        echo "Processing $repo..."
+        if [[ "$(git log --author "$expected_author" | wc -l)" != 0 ]]; then
+            output="/users/tchamber/public_html/gitstats/$repo_name"
+            if gitstats . "$output" >/dev/null; then
+                echo "  Wrote report to $output"
+            else
+                echg "  Failed..."
+            fi
+        else
+            echo "  No commits from $expected_author; skipping"
+        fi
+    done
+}
+
+
+function run_git_stats_importer_for_all_repos() {
+    PATH=/home/gbors/node/bin:$PATH
+
+
+    local expected_author="Thomas Chamberlin"
+    for repo in "$REPOS"/*; do
+        cd "$repo"
+        repo_name="$(basename "$repo")"
+        echo "Processing $repo..."
+        if [[ "$(git log --author "$expected_author" | wc -l)" != 0 ]]; then
+            if git-stats-importer -e tchamber@nrao.edu,tchamber@gb.nrao.edu,thomaswchamberlin@gmail.com >/dev/null; then
+                echo "  Success"
+            else
+                echg "  Failed..."
+            fi
+        else
+            echo "  No commits from $expected_author; skipping"
+        fi
+    done
+}
+
+pretty_path() {
+    python -c "print('\n  '.join('$1'.split(':')))"
+}
+alias pp=pretty_path
+
+function calc {
+    python -c "print($*)"
+}

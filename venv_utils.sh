@@ -5,7 +5,7 @@ function gen_venv_path() {
     if [ -z "$PYTHON_EXEC" ]; then
         PYTHON_EXEC=python
     fi
-    python_version="$("$PYTHON_EXEC" --version | awk '{print $2}')"
+    python_version="$("$PYTHON_EXEC" --version |& awk '{print $2}')"
 
     if [[ -z "$VENV_HOME" ]]; then
         VENV_HOME="/home/sandboxes/$USER/venvs"
