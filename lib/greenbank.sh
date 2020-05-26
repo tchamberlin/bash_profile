@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+umask 002
+
+export TWC_HOME=/users/tchamber
+
 ### General-purpose aliases and functions ###
 
 export HISTSIZE=
@@ -7,11 +12,26 @@ export HISTFILESIZE=
 export HISTFILE=$TWC_HOME/.bash_eternal_history
 HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
-# PROMPT_COMMAND='history -a'
-# export PROMPT_COMMAND='printf "\033]0;%s@%s:%s\007" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
 
 # Reload my environment
 alias twc="source $TWC_HOME/.bash_profile"
+
+### PATH ###
+
+PATH="$PATH:/home/gbt1/sublime_merge"
+PATH="$PATH:/home/gbt1/sublime_text_3"
+PATH="$PATH:$SB/programs/bin"
+PATH="$PATH:/users/tchamber/bin"
+PATH="$PATH:/opt/local/bin"
+PATH="$PATH:$TWC_HOME/bin"
+PATH="$PATH:$SB/repos/bash_scripts"
+PATH="$PATH:/users/tchamber/.local/bin"
+PATH="$PATH:/home/sandboxes/tchamber/haskell/install/bin"
+
+###
+
+export PYENV_ROOT=$SB/.pyenv
+
 
 # Shortcut to be monctrl via ssh
 bem()
@@ -123,18 +143,11 @@ function cddid() {
     echo "Successfully entered Django Import Data Environment"
 }
 
-# do_local() {
-
-# }
-# export -f do_local
 alias lcl=do_local
 alias l=lcl
 
 alias hl="history | less +G" 
 
-# alias git=git_wrapper
-
-# alias "git clone"=git_clone_wrapper
 
 # https://gist.github.com/tchamberlin/ed67f70ec5837b36a8ac2b025cad6700
 # Shortcut to open up an rdesktop session
@@ -371,7 +384,6 @@ function handle_go_to_repo() {
             echo "No explicit rules defined for $repo; attempting to find virtualenv" >&2
             sv
         fi
-        # export PROMPT_COMMAND='printf "\033]0;(%s) %s@%s:%s\007" "$repo" "${USER}" "${HOSTNAME%%.*}" "${PWD/#$HOME/~}"'
         path_part="${PWD/#$HOME/~}"
 	path_part="${path_part/$SB/\$SB}"
 	echo -en "\033]0;${USER}@${HOSTNAME}:${path_part}\a"
@@ -463,81 +475,6 @@ usegcc53()
 export STACK_ROOT=/home/sandboxes/tchamber/haskell/.stack
 
 
-### Prompt ###
-
-# Terminal Colors
-# Reset
-Color_Off="\[\e[0m\]"       # Text Reset
-
-# Regular Colors
-# Black="\[\e[0;30m\]"        # Black
-# Red="\[\e[0;31m\]"          # Red
-# Green="\[\e[0;32m\]"        # Green
-# Yellow="\[\e[0;33m\]"       # Yellow
-# Blue="\[\e[0;34m\]"         # Blue
-# Purple="\[\e[0;35m\]"       # Purple
-# Cyan="\[\e[0;36m\]"         # Cyan
-# White="\[\e[0;37m\]"        # White
-
-# Bold
-BBlack="\[\e[1;30m\]"       # Black
-BRed="\[\e[1;31m\]"         # Red
-BGreen="\[\e[1;32m\]"       # Green
-BYellow="\[\e[1;33m\]"      # Yellow
-BBlue="\[\e[1;34m\]"        # Blue
-BPurple="\[\e[1;35m\]"      # Purple
-BCyan="\[\e[1;36m\]"        # Cyan
-BWhite="\[\e[1;37m\]"       # White
-
-# Underline
-# UBlack="\[\e[4;30m\]"       # Black
-# URed="\[\e[4;31m\]"         # Red
-# UGreen="\[\e[4;32m\]"       # Green
-# UYellow="\[\e[4;33m\]"      # Yellow
-# UBlue="\[\e[4;34m\]"        # Blue
-# UPurple="\[\e[4;35m\]"      # Purple
-# UCyan="\[\e[4;36m\]"        # Cyan
-# UWhite="\[\e[4;37m\]"       # White
-
-# Background
-# On_Black="\[\e[40m\]"       # Black
-# On_Red="\[\e[41m\]"         # Red
-# On_Green="\[\e[42m\]"       # Green
-# On_Yellow="\[\e[43m\]"      # Yellow
-# On_Blue="\[\e[44m\]"        # Blue
-# On_Purple="\[\e[45m\]"      # Purple
-# On_Cyan="\[\e[46m\]"        # Cyan
-# On_White="\[\e[47m\]"       # White
-
-# High Intensty
-# IBlack="\[\e[0;90m\]"       # Black
-# IRed="\[\e[0;91m\]"         # Red
-# IGreen="\[\e[0;92m\]"       # Green
-# IYellow="\[\e[0;93m\]"      # Yellow
-# IBlue="\[\e[0;94m\]"        # Blue
-# IPurple="\[\e[0;95m\]"      # Purple
-# ICyan="\[\e[0;96m\]"        # Cyan
-# IWhite="\[\e[0;97m\]"       # White
-
-# Bold High Intensty
-# BIBlack="\[\e[1;90m\]"      # Black
-# BIRed="\[\e[1;91m\]"        # Red
-# BIGreen="\[\e[1;92m\]"      # Green
-# BIYellow="\[\e[1;93m\]"     # Yellow
-# BIBlue="\[\e[1;94m\]"       # Blue
-# BIPurple="\[\e[1;95m\]"     # Purple
-# BICyan="\[\e[1;96m\]"       # Cyan
-# BIWhite="\[\e[1;97m\]"      # White
-
-# High Intensty backgrounds
-# On_IBlack="\[\e[0;100m\]"   # Black
-# On_IRed="\[\e[0;101m\]"     # Red
-# On_IGreen="\[\e[0;102m\]"   # Green
-# On_IYellow="\[\e[0;103m\]"  # Yellow
-# On_IBlue="\[\e[0;104m\]"    # Blue
-# On_IPurple="\[\e[0;105m\]"  # Purple
-# On_ICyan="\[\e[0;106m\]"    # Cyan
-# On_IWhite="\[\e[0;107m\]"   # White
 
 # Decide what color the username text is in the terminal based on who
 # I currently am
@@ -569,10 +506,6 @@ TIMECOLOR=$BPurple
 NUMBCOLOR=$BCyan
 PATHCOLOR=$BPurple
 TEXTCOLOR=$Color_Off
-
-# export PS1="$Color_Off\n$PUNCCOLOR<$USERCOLOR\u$PUNCCOLOR@$HOSTCOLOR\h$PUNCCOLOR> $PUNCCOLOR{$TIMECOLOR\d$PUNCCOLOR|$TIMECOLOR\t$PUNCCOLOR} ($NUMBCOLOR#\!$PUNCCOLOR) [$PATHCOLOR\w$PUNCCOLOR]\$(__git_ps1)\n\$ $TEXTCOLOR"
-export PS1="$Color_Off\n$PUNCCOLOR<$USERCOLOR\u$PUNCCOLOR@$HOSTCOLOR\h$PUNCCOLOR> [$PATHCOLOR\w$PUNCCOLOR]\n\$$TEXTCOLOR "
-# export PROMPT_COMMAND="set +u; ${PROMPT_COMMAND}; __git_ps1 '$Color_Off\n$PUNCCOLOR<$USERCOLOR\u$PUNCCOLOR@$HOSTCOLOR\h$PUNCCOLOR> [$PATHCOLOR\w$PUNCCOLOR]' '\n\$ $TEXTCOLOR'"
 
 handle_go_to_repo
 
@@ -706,3 +639,26 @@ export TLDR_FILE_ISTYLE="Bold Magenta"
 # Color/BG (Newline and Space also allowed) for error and info messages
 export TLDR_ERROR_COLOR="Newline Space Red"
 export TLDR_INFO_COLOR="Newline Space Green"
+
+export MANPATH=$MANPATH:$SB/programs/share/man
+
+#echo -en "\033]0;$USER@$HOSTNAME\a"
+
+# function prompt_command {
+#     ~/.bash_prompt_command
+# }
+
+# export PROMPT_COMMAND=prompt_command
+
+
+### Manage Apache Configs
+# shellcheck disable=SC1091
+source "/home/gbt1/manage_apache_configs/completions.sh"
+###
+
+
+
+### THINGS THAT DO THINGS GO BELOW THIS
+
+# Print the current redhat release version
+'cat' /etc/redhat-release >&2

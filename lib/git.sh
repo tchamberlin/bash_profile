@@ -1,7 +1,15 @@
 #!/bin/bash
 
+GIT_PS1_SHOWCOLORHINTS=yep
+GIT_PS1_SHOWDIRTYSTATE=yep
+GIT_PS1_SHOWUNTRACKEDFILES=yep
+GIT_PS1_SHOWSTASHSTATE=yep
+GIT_PS1_SHOWUPSTREAM=yep
+source "$TWC_BASH_REPO_PATH"/extern/git-prompt.sh
+source "$TWC_BASH_REPO_PATH"/extern/git-completion.bash
+
 alias gs='git status '
-alias gr='git reflog --date=iso '
+alias grl='git reflog --date=iso '
 alias ga='git add '
 alias gau='git add -u '
 alias gb='git branch '
@@ -10,7 +18,8 @@ alias gd='git diff '
 alias go='git checkout '
 alias gom='git checkout master '
 alias gh='git hist '
-alias gsu='git status '
+alias gsu='git status -uno'
+alias grv='git remote -v'
 
 gk()
 {
@@ -19,15 +28,6 @@ gk()
 
 alias gka="gk --all"
 
-# git magic
-# adds the current branch to the bash prompt
-set +u
-source "$TWC_HOME"/.git-prompt.sh
-
-# allows tab completion of branches and commands and such
-if [ -f "$TWC_HOME"/.git-completion.bash ]; then
-    source "$TWC_HOME"/.git-completion.bash
-fi
 
 __git_complete gs __git_main
 __git_complete ga __git_main
