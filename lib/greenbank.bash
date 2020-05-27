@@ -642,18 +642,10 @@ export TLDR_INFO_COLOR="Newline Space Green"
 
 export MANPATH=$MANPATH:$SB/programs/share/man
 
-#echo -en "\033]0;$USER@$HOSTNAME\a"
-
-# function prompt_command {
-#     ~/.bash_prompt_command
-# }
-
-# export PROMPT_COMMAND=prompt_command
-
 
 ### Manage Apache Configs
 # shellcheck disable=SC1091
-source "/home/gbt1/manage_apache_configs/completions.sh"
+source "/home/gbt1/manage_apache_configs/completions.bash"
 ###
 
 

@@ -18,9 +18,9 @@ if [[ -e ~/.inputrc ]]; then
     mv ~/.inputrc ~/.inputrc.bak
 fi
 
-echo "Linking $scriptdir/lib/bash_profile.sh to ~/.bash_profile"
-ln -s "$scriptdir"/lib/bash_profile.sh ~/.bash_profile
-echo "Linking $scriptdir/lib/bashrc.sh to ~/.bashrc"
-ln -s "$scriptdir"/lib/bashrc.sh ~/.bashrc
-echo "Linking $scriptdir/lib/inputrc.sh to ~/.inputrc"
-ln -s "$scriptdir"/lib/inputrc.sh ~/.inputrc
+echo "Linking $scriptdir/lib/bash_profile.bash to ~/.bash_profile"
+ln -s "$scriptdir"/lib/bash_profile.bash ~/.bash_profile
+echo "Linking $scriptdir/lib/bashrc.bash to ~/.bashrc"
+ln -s "$scriptdir"/lib/bashrc.bash ~/.bashrc
+echo "Linking $scriptdir/lib/inputrc.bash to ~/.inputrc"
+ln -s "$scriptdir"/lib/inputrc.bash ~/.inputrc

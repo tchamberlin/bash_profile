@@ -11,14 +11,14 @@ set -u
 export TWC_BASH_REPO_PATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"/..
 
 
-if [ -f "$TWC_BASH_REPO_PATH"/lib/bash_aliases.sh ]; then
-    source "$TWC_BASH_REPO_PATH"/lib/bash_aliases.sh
+if [ -f "$TWC_BASH_REPO_PATH"/lib/bash_aliases.bash ]; then
+    source "$TWC_BASH_REPO_PATH"/lib/bash_aliases.bash
 fi
 
 ### SITE-SPECIFIC LOGIC ###
 if [[ "$(hostname -f)" == *gb.nrao.edu ]]; then
     # shellcheck disable=SC1090
-    source "$TWC_BASH_REPO_PATH/lib/greenbank.sh"
+    source "$TWC_BASH_REPO_PATH/lib/greenbank.bash"
 elif [[ "$(hostname -f)" == "potato" ]]; then
     export TWC_HOME="$HOME"
     export MY_WORKSTATION="potato"
@@ -28,13 +28,13 @@ else
 fi
 
 # shellcheck disable=SC1090
-source "$TWC_BASH_REPO_PATH/lib/venv_utils.sh"
+source "$TWC_BASH_REPO_PATH/lib/venv_utils.bash"
 
 # shellcheck disable=SC1090
-source "$TWC_BASH_REPO_PATH/lib/git.sh"
+source "$TWC_BASH_REPO_PATH/lib/git.bash"
 
 # shellcheck disable=SC1090
-source "$TWC_BASH_REPO_PATH/lib/colors.sh"
+source "$TWC_BASH_REPO_PATH/lib/colors.bash"
 
 
 ### Set prompt/PS1/PROMPT_COMMAND ###
@@ -55,9 +55,9 @@ __git_ps1 "$C_Cyan\u@\h$C_Color_Off:$C_Blue\w" "$prompt_token_color\\\$ $C_Color
 EOF
 
 # shellcheck disable=SC1090
-source "$TWC_BASH_REPO_PATH/lib/common.sh"
+source "$TWC_BASH_REPO_PATH/lib/common.bash"
 # shellcheck disable=SC1090
-source "$TWC_BASH_REPO_PATH/lib/tools.sh"
+source "$TWC_BASH_REPO_PATH/lib/tools.bash"
 
 # Turn off unset variable detection; don't want this in an interactive shell!
 set +u
