@@ -296,7 +296,7 @@ findlib()
 export GBORS=$SB/projects/gbors/sandbox/gbors
 
 function _debug() {
-    if [ -n "$_LOG_DEBUG" ]; then
+    if [ -n "${_LOG_DEBUG-}" ]; then
         echo "DEBUG: $*" >&2
     fi
 }
