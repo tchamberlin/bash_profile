@@ -365,7 +365,7 @@ function cdr() {
 }
 
 function handle_go_to_repo() {
-    if [ -n "$GO_TO_REPO" ]; then
+    if [ -n "${GO_TO_REPO-}" ]; then
         repo="$GO_TO_REPO"
         _debug "handle_go_to_repo: GO_TO_REPO found; derived repo $repo"
         cd "$REPOS/$repo"
@@ -645,7 +645,7 @@ export MANPATH=$MANPATH:$SB/programs/share/man
 
 ### Manage Apache Configs
 # shellcheck disable=SC1091
-source "/home/gbt1/manage_apache_configs/completions.bash"
+source "/home/gbt1/manage_apache_configs/completions.sh"
 ###
 
 
