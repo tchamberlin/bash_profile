@@ -52,7 +52,7 @@ if [[ "$code" -ne 0 ]] && [[ "$code" -ne 130 ]]; then
 elif [[ "$code" -eq 130 ]]; then
     prompt_token_color="$C_BYellow"
 else
-    prompt_token_color="$C_Color_Off"
+    prompt_token_color="$C_BBlack"
 fi
 path_part="${PWD/#$HOME/~}"
 if [[ -n "${SB-}" ]]; then
@@ -60,7 +60,7 @@ if [[ -n "${SB-}" ]]; then
 fi
 echo -en "\033]0;${USER}@${HOSTNAME}:${path_part}\a"
 
-__git_ps1 "$USERCOLOR\u$C_Color_Off@$HOSTCOLOR\h$C_Color_Off:$PATHCOLOR\w$C_Color_Off" "$prompt_token_color\\\$ $C_Color_Off"
+__git_ps1 "${USERCOLOR}\u${C_Color_Off}@${HOSTCOLOR}\h${C_Color_Off}:${PATHCOLOR}\w${C_Color_Off}" "${prompt_token_color}\\\$ ${C_Color_Off}"
 EOF
 
 # shellcheck disable=SC1090

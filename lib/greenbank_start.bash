@@ -54,5 +54,6 @@ fi
 
 TIMECOLOR=$C_BPurple
 NUMBCOLOR=$C_BCyan
+PATHCOLOR="$C_Blue"
 # PATHCOLOR=$C_BPurple
 TEXTCOLOR=$C_Color_Off
