@@ -662,3 +662,4 @@ source "/home/gbt1/manage_apache_configs/completions.sh"
 
 # Print the current redhat release version
 'cat' /etc/redhat-release >&2
+

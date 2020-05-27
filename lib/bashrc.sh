@@ -1,26 +1,21 @@
 #!/bin/bash
 
-
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
       *) return;;
 esac
 
+set -u
+
 export TWC_BASH_REPO_PATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"/..
 
 
-# some more ls aliases
-alias ll='ls -alFh'
-alias la='ls -Ah'
-alias l='ls -CFh'
-alias lr='ls -lrtha'
+if [ -f "$TWC_BASH_REPO_PATH"/lib/bash_aliases.sh ]; then
+    source "$TWC_BASH_REPO_PATH"/lib/bash_aliases.sh
+fi
 
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-
+### SITE-SPECIFIC LOGIC ###
 if [[ "$(hostname -f)" == *gb.nrao.edu ]]; then
     # shellcheck disable=SC1090
     source "$TWC_BASH_REPO_PATH/lib/greenbank.sh"
@@ -41,12 +36,8 @@ source "$TWC_BASH_REPO_PATH/lib/git.sh"
 # shellcheck disable=SC1090
 source "$TWC_BASH_REPO_PATH/lib/colors.sh"
 
-# if [[ $? ]]; then
-#     prompt_token_color="$C_Red"
-# else
-#     prompt_token_color="$C_Color_Off"
-# fi
 
+### Set prompt/PS1/PROMPT_COMMAND ###
 # Needs to be set after git and colors, but before tools
 read -r -d '' PROMPT_COMMAND <<'EOF'
 if [[ $? -ne 0 ]]; then
@@ -55,7 +46,9 @@ else
     prompt_token_color="$C_Color_Off"
 fi
 path_part="${PWD/#$HOME/~}"
-path_part="${path_part/$SB/\$SB}"
+if [[ -n "${SB-}" ]]; then
+    path_part="${path_part/$SB/\$SB}"
+fi
 echo -en "\033]0;${USER}@${HOSTNAME}:${path_part}\a"
 
 __git_ps1 "$C_Cyan\u@\h$C_Color_Off:$C_Blue\w" "$prompt_token_color\\\$ $C_Color_Off"
@@ -66,8 +59,8 @@ source "$TWC_BASH_REPO_PATH/lib/common.sh"
 # shellcheck disable=SC1090
 source "$TWC_BASH_REPO_PATH/lib/tools.sh"
 
-### THINGS THAT DO THINGS GO BELOW THIS
+# Turn off unset variable detection; don't want this in an interactive shell!
+set +u
 
 # Intended as the final output
 echo "Thomas's bash profile loaded" >&2
-

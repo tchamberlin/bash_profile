@@ -1,40 +1,17 @@
 #! /bin/bash
 
-
-### General-purpose aliases ###
-
-alias ll="ls -alFh"
-alias lr="ls -alFhrt"
-
-# Copy selection to clipboard
-alias toclip="xclip -selection clipboard"
-# Paste selection from clipboard
-alias fromclip="xclip -selection clipboard -out"
-alias _clip=toclip
-alias clip_=fromclip
-
-
-### bashrc shit
-
 export HISTSIZE=
 export HISTFILESIZE=
 export HISTFILE=$TWC_HOME/.bash_eternal_history
 HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
 
-
-
 # make less more friendly for non-text input files, see lesspipe(1)
 [ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
-# enable color support of ls and also add handy aliases
+# enable color support of ls
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
 fi
 
 # check the window size after each command and, if necessary,
@@ -181,7 +158,6 @@ testregex()
     done
 }
 
-alias finf="grep -rnI"
 
 # Remove tilde files (backups from text editors)
 rmt()
@@ -414,8 +390,47 @@ function run_git_stats_importer_for_all_repos() {
 pretty_path() {
     python -c "print('\n  '.join('$1'.split(':')))"
 }
-alias pp=pretty_path
 
 function calc {
     python -c "print($*)"
+}
+
+init_ssh_agent() {
+    if [[ -z "${1-}" ]]; then
+        echo "usage: init_ssh_agent key_path [key_path ...]" >&2
+        return 1
+    fi
+
+    local ssh_agent_keys
+    ssh_agent_keys="$(ssh-add -l || true)"
+
+    for path in "$@"; do
+        # Add key to SSH agent if it isn't already there
+        if [[ "$ssh_agent_keys" != *" $path "* ]]; then
+            ssh-add "$path"
+        fi
+    done
+}
+
+init_ssh_master() {
+    if [[ -z "${1-}" ]]; then
+        echo "usage: init_ssh_master remote_host [local_port]" >&2
+        return 1
+    fi
+
+    local remote_host
+    remote_host="$1"
+    local local_port
+    local_port="${2-}"
+
+    local ssh_cmd
+    if [[ -n "$local_port" ]]; then
+        ssh_cmd="ssh -D localhost:$local_port -f -q -N -A -M $remote_host"
+    else
+        ssh_cmd="ssh -f -q -N -A -M $remote_host"
+    fi
+
+    if ! pgrep -f "$ssh_cmd" >/dev/null; then
+        eval "$ssh_cmd"
+    fi
 }

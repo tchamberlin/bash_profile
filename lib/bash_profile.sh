@@ -17,6 +17,9 @@ if [[ "$MY_WORKSTATION" == "$HOSTNAME" ]]; then
     fi
 fi
 
+init_ssh_agent ~/.ssh/id_rsa ~/.ssh/id_rsa_gbo
+init_ssh_master ssh.gb.nrao.edu 8123
+
 [[ -r "$TWC_BASH_REPO_PATH"/lib/bashrc.sh ]] && . "$TWC_BASH_REPO_PATH"/lib/bashrc.sh
 
 # NOTHING SHOULD GO BELOW HERE (our bashrc expects to be sourced last)!
