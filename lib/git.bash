@@ -5,8 +5,8 @@ GIT_PS1_SHOWDIRTYSTATE=yep
 GIT_PS1_SHOWUNTRACKEDFILES=yep
 GIT_PS1_SHOWSTASHSTATE=yep
 GIT_PS1_SHOWUPSTREAM=yep
-source "$TWC_BASH_REPO_PATH"/extern/git-prompt.sh
-source "$TWC_BASH_REPO_PATH"/extern/git-completion.bash
+source "$_BASH_REPO_PATH"/extern/git-prompt.sh
+source "$_BASH_REPO_PATH"/extern/git-completion.bash
 
 
 

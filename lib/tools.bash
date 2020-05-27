@@ -23,8 +23,8 @@ eval "$(pyenv init -)"
 ### dephell
 # Enable dephell completions
 # shellcheck disable=SC1091
-[[ -r "/users/tchamber/.local/etc/bash_completion.d/dephell.bash-completion" ]] && \
-    source "/users/tchamber/.local/etc/bash_completion.d/dephell.bash-completion"
+[[ -r "$ABS_HOME/.local/etc/bash_completion.d/dephell.bash-completion" ]] && \
+    source "$ABS_HOME/.local/etc/bash_completion.d/dephell.bash-completion"
 ###
 
 ### fzf

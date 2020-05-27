@@ -2,7 +2,7 @@
 
 export HISTSIZE=
 export HISTFILESIZE=
-export HISTFILE=$TWC_HOME/.bash_eternal_history
+export HISTFILE=$ABS_HOME/.bash_eternal_history
 HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
 
@@ -165,9 +165,6 @@ rmt()
     find . -type f -name '*~' -delete
 }
 
-# My default path (with no .bash_profile at all) is:
-# /usr/kerberos/sbin:/usr/kerberos/bin:/bin:/sbin:/usr/bin:/usr/sbin:
-#/opt/local/bin:/usr/local/bin:/usr/X11R6/bin:/users/tchamber/bin:.
 pathadd()
 {
     # If the directory given in the argument exists...
@@ -344,49 +341,6 @@ function run_gitstats_for_all_repos() {
     done
 }
 
-
-function run_gitstats_for_my_repos() {
-    local expected_author="Thomas Chamberlin"
-    local output
-    for repo in "$REPOS"/*; do
-        cd "$repo"
-        repo_name="$(basename "$repo")"
-        echo "Processing $repo..."
-        if [[ "$(git log --author "$expected_author" | wc -l)" != 0 ]]; then
-            output="/users/tchamber/public_html/gitstats/$repo_name"
-            if gitstats . "$output" >/dev/null; then
-                echo "  Wrote report to $output"
-            else
-                echg "  Failed..."
-            fi
-        else
-            echo "  No commits from $expected_author; skipping"
-        fi
-    done
-}
-
-
-function run_git_stats_importer_for_all_repos() {
-    PATH=/home/gbors/node/bin:$PATH
-
-
-    local expected_author="Thomas Chamberlin"
-    for repo in "$REPOS"/*; do
-        cd "$repo"
-        repo_name="$(basename "$repo")"
-        echo "Processing $repo..."
-        if [[ "$(git log --author "$expected_author" | wc -l)" != 0 ]]; then
-            if git-stats-importer -e tchamber@nrao.edu,tchamber@gb.nrao.edu,thomaswchamberlin@gmail.com >/dev/null; then
-                echo "  Success"
-            else
-                echg "  Failed..."
-            fi
-        else
-            echo "  No commits from $expected_author; skipping"
-        fi
-    done
-}
-
 pretty_path() {
     python -c "print('\n  '.join('$1'.split(':')))"
 }
@@ -434,3 +388,5 @@ init_ssh_master() {
         eval "$ssh_cmd"
     fi
 }
+
+export EDITOR=vim
