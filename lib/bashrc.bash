@@ -10,7 +10,12 @@ esac
 # trap 'rc=$?; echo "ERR at line ${BASH_SOURCE}:${LINENO} (rc: $rc)"' ERR
 set -u
 
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+fi
+
 export ABS_HOME="${ABS_HOME-$HOME}"
+export REPOS="${REPOS-$ABS_HOME/repos}"
 export _BASH_REPO_PATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"/..
 
 if [ -f "$_BASH_REPO_PATH"/lib/bash_aliases.bash ]; then
@@ -24,7 +29,7 @@ if [[ -e "$HOME/.site_specific_bashrc_start" ]]; then
     source "$HOME/.site_specific_bashrc_start"
 fi
 
-export PYENV_ROOT="${PYENV_ROOT-~/.pyenv}"
+export PYENV_ROOT="${PYENV_ROOT-$HOME/.pyenv}"
 USERCOLOR="${USERCOLOR-$C_Cyan}"
 HOSTCOLOR="${HOSTCOLOR-$C_Cyan}"
 PATHCOLOR="${PATHCOLOR-$C_Blue}"
@@ -49,7 +54,13 @@ if [[ -n "${SB-}" ]]; then
 fi
 echo -en "\033]0;${USER}@${HOSTNAME}:${path_part}\a"
 
-__git_ps1 "${USERCOLOR}\u${C_Color_Off}@${HOSTCOLOR}\h${C_Color_Off}:${PATHCOLOR}\w${C_Color_Off}" "${prompt_token_color}\\\$ ${C_Color_Off}"
+if [[ -n "${VIRTUAL_ENV-}" ]]; then
+    venv_part="(\$(basename "${VIRTUAL_ENV}"))\n"
+else
+    venv_part=""
+fi
+
+__git_ps1 "${venv_part}${USERCOLOR}\u${C_Color_Off}@${HOSTCOLOR}\h${C_Color_Off}:${PATHCOLOR}\w${C_Color_Off}" "${prompt_token_color}\\\$ ${C_Color_Off}"
 EOF
 
 # shellcheck disable=SC1090
@@ -62,8 +73,11 @@ if [[ -e "$HOME/.site_specific_bashrc_end" ]]; then
     source "$HOME/.site_specific_bashrc_end"
 fi
 
+handle_go_to_repo
+
 # Turn off unset variable detection; don't want this in an interactive shell!
 set +u
 
 # Intended as the final output
 echo "Thomas's bash profile loaded" >&2
+

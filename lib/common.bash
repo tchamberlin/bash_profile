@@ -379,7 +379,7 @@ init_ssh_master() {
 
     local ssh_cmd
     if [[ -n "$local_port" ]]; then
-        ssh_cmd="ssh -D localhost:$local_port -f -q -N -A -M $remote_host"
+        ssh_cmd="ssh -D localhost:$local_port -L 5901:localhost:5901 -f -q -N -A -M $remote_host"
     else
         ssh_cmd="ssh -f -q -N -A -M $remote_host"
     fi
@@ -390,3 +390,102 @@ init_ssh_master() {
 }
 
 export EDITOR=vim
+
+function _debug() {
+    if [ -n "${_LOG_DEBUG-}" ]; then
+        echo "DEBUG: $*" >&2
+    fi
+}
+
+### CDR ###
+# Enable tab completion for cdr function
+complete -W "$(ls $REPOS)" 'cdr'
+function cdr() {
+    if [ -z "$1" ]; then
+        _debug "no arg given; cd'ing to repos dir"
+        cd "$REPOS"
+        return 0
+    fi
+
+    local repo
+    repo="$1"
+
+    export CURRENT_REPO="$repo"
+
+    if [ ! -d "$REPOS/$repo" ]; then
+        echo "ERROR: $REPOS/$repo does not exist!" >&2
+        return 1
+    fi
+
+    _debug "Derived target repo: $repo"
+
+    ssh_target_host="${SSH_TARGET_HOST-}"
+
+    # # Now, try a few different versions of project name. Sometimes we use -;
+    # # sometimes we use _, so let's try some common permutations
+    # # v1: No changes
+    # sublime_project_path_v1="$SUBLIME_PROJECTS/$repo.sublime-project"
+    # # v2: Use - instead of _
+    # sublime_project_path_v2="$SUBLIME_PROJECTS/${repo//_/-}.sublime-project"
+    # # v3: Use _ instead of -
+    # sublime_project_path_v3="$SUBLIME_PROJECTS/${repo//-/_}.sublime-project"
+    # for sublime_project_path in "$sublime_project_path_v1" "$sublime_project_path_v2" "$sublime_project_path_v3"; do
+    #     _debug "Attempting to find Sublime Text project at: $sublime_project_path"
+    #     if [ -f "$sublime_project_path" ]; then
+    #         _debug "Found $sublime_project_path; attempting to open in Sublime Text"
+    #         _subl --project "$sublime_project_path"
+    #         # Break out after we've made a single attempt to open the project
+    #         break
+    #     else
+    #         _debug "No project found at $sublime_project_path"
+    #     fi
+    # done
+
+    if [[ -n "$ssh_target_host" ]] && [ "$(hostname)" != "$ssh_target_host" ]; then
+        echo "Setting tab title to $USER@$HOSTNAME: $repo"
+        _debug "Not currently on target host $ssh_target_host; ssh'ing now"
+        # This is where the magic happens! We ssh to our target host, then open a new
+        # bash shell with two variables set:
+        # _LOG_DEBUG: this is carried over from the current environment, to enable
+        #             logging to continue if it has been enabled
+        # GO_TO_REPO: This is set to the path of the target repo. When the new
+        #             shell opens, handle_go_to_repo will pick up this variable
+        #             and perform the relevant actions!
+        ssh -qt "$ssh_target_host" _LOG_DEBUG="$_LOG_DEBUG" GO_TO_REPO="$repo" bash
+    else
+        _debug "Already on target host $ssh_target_host (or no target host)"
+        # In this case, we trigger handle_go_to_repo manually
+        GO_TO_REPO="$repo" handle_go_to_repo
+    fi
+}
+
+function handle_go_to_repo() {
+    if [ -n "${GO_TO_REPO-}" ]; then
+        repo="$GO_TO_REPO"
+        _debug "handle_go_to_repo: GO_TO_REPO found; derived repo $repo"
+        cd "$REPOS/$repo"
+        if [[ "$repo" == "gbors" ]]; then
+            _debug "Rules found for repo $repo"
+            source ./env/gbors.bash
+            export DJANGO_SETTINGS_MODULE=gbors.settings.development
+        elif [[ "$repo" == "nrqz_admin" ]]; then
+            source /home/sandboxes/tchamber/venvs/nrqz-admin-py3.7/bin/activate
+            export DJANGO_SETTINGS_MODULE=nrqz_admin.settings.local
+        elif [[ "$repo" == "SDDdocs" ]]; then
+            sv
+            ./bin/builddocs --host "$HOSTNAME" --port 8189
+        else
+            echo "No explicit rules defined for $repo; attempting to find virtualenv" >&2
+            # sv
+        fi
+        path_part="${PWD/#$HOME/~}"
+    path_part="${path_part/$SB/\$SB}"
+    echo -en "\033]0;${USER}@${HOSTNAME}:${path_part}\a"
+
+    else
+        _debug "handle_go_to_repo: GO_TO_REPO is not defined; NOP"
+    fi
+}
+### END CDR ###
+
+export PYTHONBREAKPOINT=ipdb.set_trace
