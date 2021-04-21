@@ -52,7 +52,7 @@ path_part="${PWD/#$HOME/~}"
 if [[ -n "${SB-}" ]]; then
     path_part="${path_part/$SB/\$SB}"
 fi
-echo -en "\033]0;${USER}@${HOSTNAME}:${path_part}\a"
+echo -en "\033]0;${USER}@${HOSTNAME}⁍${path_part}\a"
 
 if [[ -n "${VIRTUAL_ENV-}" ]]; then
     venv_part="(\$(basename "${VIRTUAL_ENV}"))\n"
@@ -60,13 +60,14 @@ else
     venv_part=""
 fi
 
-__git_ps1 "${venv_part}${USERCOLOR}\u${C_Color_Off}@${HOSTCOLOR}\h${C_Color_Off}:${PATHCOLOR}\w${C_Color_Off}" "${prompt_token_color}\\\$ ${C_Color_Off}"
+__git_ps1 "${venv_part}${USERCOLOR}\u${C_Color_Off}@${HOSTCOLOR}\h${C_Color_Off}⁍${PATHCOLOR}\w${C_Color_Off}" "${prompt_token_color}\\\$ ${C_Color_Off}"
 EOF
 
 # shellcheck disable=SC1090
 source "$_BASH_REPO_PATH/lib/common.bash"
 # shellcheck disable=SC1090
 source "$_BASH_REPO_PATH/lib/tools.bash"
+export PROMPT_DIRTRIM=3
 
 ### SITE-SPECIFIC LOGIC ###
 if [[ -e "$HOME/.site_specific_bashrc_end" ]]; then

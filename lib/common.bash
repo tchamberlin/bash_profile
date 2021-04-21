@@ -379,7 +379,7 @@ init_ssh_master() {
 
     local ssh_cmd
     if [[ -n "$local_port" ]]; then
-        ssh_cmd="ssh -D localhost:$local_port -L 5901:localhost:5901 -f -q -N -A -M $remote_host"
+        ssh_cmd="ssh -D localhost:$local_port -L 5901:localhost:5901 -L 9753:localhost:9753 -f -q -N -A -M $remote_host"
     else
         ssh_cmd="ssh -f -q -N -A -M $remote_host"
     fi
